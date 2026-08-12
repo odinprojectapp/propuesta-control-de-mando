@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Propuesta comercial: cinco dashboards de Power BI e integracion Control de Mando con SharePoint.">
+<meta name="color-scheme" content="dark">
+<title>Propuesta · Control de Mando</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Propuesta · Control de Mando">
+<meta property="og:description" content="Cinco dashboards de Power BI y la aplicacion que valida e integra los datos al SharePoint de su organizacion.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Propuesta · Control de Mando">
+<meta name="twitter:description" content="Cinco dashboards de Power BI y la aplicacion que valida e integra los datos al SharePoint de su organizacion.">
+<style>
+  /* reset minimo (el artifact lo inyecta; aqui va explicito) */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  img, svg { max-width: 100%; }
+  @media print {
+    body::before, body::after { display: none !important; }
+    .nav-shell { display: none !important; }
+    .rev { opacity: 1 !important; transform: none !important; filter: none !important; }
+    section { padding: 40px 0 !important; break-inside: avoid; }
+    .bezel { break-inside: avoid; }
+    .hero { min-height: auto !important; padding: 40px 0 !important; }
+  }
+</style>
+</head>
+<body>
+<title>Control de Mando</title>
+<style>
+  /* ══════════════════════════════════════════════════════
+     ETHEREAL GLASS · OLED · Ámbar operativo
+     ══════════════════════════════════════════════════════ */
+
+  :root {
+    --void: #050505;
+    --shell: rgba(255,255,255,0.035);
+    --core: #0C0D0F;
+    --core-2: #121417;
+    --hair: rgba(255,255,255,0.09);
+    --hair-2: rgba(255,255,255,0.055);
+    --ink: #F4F5F6;
+    --ink-2: #A3A8AE;
+    --ink-3: #6B7178;
+    --amber: #E0A43B;
+    --amber-dim: rgba(224,164,59,0.13);
+    --ok: #5FBE87;
+    --crit: #E0685A;
+    --warn: #E0A43B;
+    /* Cascada autónoma: sin dependencias de red. Prioriza las caras
+       de interfaz que ya existen en Windows, macOS, Linux y Android. */
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    --sans: "Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont,
+            "SF Pro Display", "Helvetica Neue", "Noto Sans", "DejaVu Sans", Verdana, sans-serif;
+    --spring: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-q: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Comprometido a un solo mundo visual: sala de control.
+     Se pinta explícitamente para no heredar el fondo del host. */
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── atmósfera: orbes de malla radial ── */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(58vw 48vw at 78% -6%, rgba(224,164,59,0.10), transparent 62%),
+      radial-gradient(50vw 44vw at 4% 32%, rgba(95,190,135,0.055), transparent 60%),
+      radial-gradient(62vw 52vw at 88% 88%, rgba(224,164,59,0.045), transparent 64%);
+  }
+
+  /* ── grano de película, fijo y sin eventos ── */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .page { position: relative; z-index: 1; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  @media (max-width: 768px) { .wrap { padding: 0 18px; } }
+
+  /* ══════════ TIPOGRAFÍA ══════════ */
+
+  h1, h2, h3, h4 { margin: 0; text-wrap: balance; letter-spacing: -0.03em; font-weight: 600; }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    border: 1px solid var(--hair);
+    background: var(--amber-dim);
+    border-radius: 999px;
+    padding: 6px 14px;
+    white-space: nowrap;
+  }
+
+  .eyebrow.plain {
+    color: var(--ink-3);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .eyebrow .dot {
+    width: 5px; height: 5px;
+    border-radius: 999px;
+    background: currentColor;
+    flex: none;
+  }
+
+  .num { font-variant-numeric: tabular-nums; font-family: var(--mono); }
+
+  /* ══════════ NAV ISLA FLOTANTE ══════════ */
+
+  .nav-shell {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    padding: 18px 18px 0;
+    pointer-events: none;
+  }
+
+  .nav {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(10,11,13,0.72);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.07);
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar { display: none; }
+
+  .nav a {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: color 0.5s var(--spring), background 0.5s var(--spring);
+  }
+
+  .nav a:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+  .nav a:focus-visible { outline: 1px solid var(--amber); outline-offset: 2px; }
+
+  .nav .brand {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--amber);
+    padding: 8px 14px 8px 16px;
+    border-right: 1px solid var(--hair-2);
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) { .nav .brand { display: none; } }
+
+  /* ══════════ DOBLE BISEL ══════════ */
+
+  .bezel {
+    background: var(--shell);
+    border: 1px solid var(--hair-2);
+    border-radius: 2rem;
+    padding: 6px;
+  }
+
+  .bezel > .core {
+    background: var(--core);
+    border: 1px solid var(--hair-2);
+    border-radius: calc(2rem - 6px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    padding: 28px;
+    height: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .bezel { border-radius: 1.5rem; }
+    .bezel > .core { border-radius: calc(1.5rem - 6px); padding: 22px; }
+  }
+
+  /* ══════════ HERO ══════════ */
+
+  .hero {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 0 90px;
+  }
+
+  .hero h1 {
+    font-size: clamp(44px, 8.2vw, 104px);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    max-width: 15ch;
+    margin: 30px 0 0;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--amber);
+  }
+
+  .hero .lede {
+    font-size: clamp(16.5px, 1.9vw, 20px);
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin-top: 32px;
+    line-height: 1.6;
+  }
+
+  .hero .lede strong { color: var(--ink); font-weight: 600; }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 1000px) { .hero-stats { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 620px)  { .hero-stats { grid-template-columns: repeat(2, 1fr); } }
+
+  .hstat {
+    background: var(--shell);
+    border: 1px solid var(--hair-2);
+    border-radius: 1.2rem;
+    padding: 4px;
+    min-width: 0;
+  }
+
+  .hstat > div {
+    background: var(--core);
+    border: 1px solid var(--hair-2);
+    border-radius: calc(1.2rem - 4px);
+    padding: 18px 20px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .hstat .v {
+    font-family: var(--mono);
+    font-size: clamp(19px, 1.7vw, 26px);
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .hstat .v span { color: var(--amber); }
+
+  .hstat .k {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 7px;
+  }
+
+  /* ══════════ SECCIONES ══════════ */
+
+  section { padding: 110px 0; position: relative; }
+
+  @media (max-width: 768px) { section { padding: 76px 0; } }
+
+  .sec-head { margin-bottom: 52px; max-width: 74ch; }
+
+  .sec-head h2 {
+    font-size: clamp(29px, 4.6vw, 52px);
+    line-height: 1.06;
+    margin-top: 22px;
+    font-weight: 600;
+  }
+
+  .sec-head .intro {
+    color: var(--ink-2);
+    max-width: 66ch;
+    margin-top: 22px;
+    font-size: 16.5px;
+  }
+
+  .sec-head .intro strong { color: var(--ink); font-weight: 600; }
+
+  h3 { font-size: 20px; }
+  h4 { font-size: 15px; letter-spacing: -0.015em; font-weight: 600; }
+  p { margin: 0 0 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ══════════ REVELADO POR SCROLL ══════════ */
+
+  .rev {
+    opacity: 0;
+    transform: translateY(38px);
+    filter: blur(9px);
+    transition:
+      opacity 0.95s var(--ease-q),
+      transform 0.95s var(--ease-q),
+      filter 0.95s var(--ease-q);
+    will-change: transform, opacity;
+  }
+
+  .rev.in { opacity: 1; transform: none; filter: blur(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rev { opacity: 1; transform: none; filter: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ══════════ BENTO ══════════ */
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+
+  .c4 { grid-column: span 4; }
+  .c5 { grid-column: span 5; }
+  .c6 { grid-column: span 6; }
+  .c7 { grid-column: span 7; }
+  .c8 { grid-column: span 8; }
+  .c12 { grid-column: span 12; }
+
+  @media (max-width: 900px) {
+    .bento { grid-template-columns: 1fr; }
+    .c4, .c5, .c6, .c7, .c8, .c12 { grid-column: span 1; }
+  }
+
+  /* ══════════ TARJETAS DE DASHBOARD ══════════ */
+
+  .dash { display: grid; grid-template-columns: 236px 1fr; gap: 0; }
+
+  @media (max-width: 900px) { .dash { grid-template-columns: 1fr; } }
+
+  .dash-id {
+    border-right: 1px solid var(--hair-2);
+    padding-right: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  @media (max-width: 900px) {
+    .dash-id {
+      border-right: none;
+      border-bottom: 1px solid var(--hair-2);
+      padding-right: 0;
+      padding-bottom: 20px;
+      margin-bottom: 22px;
+    }
+  }
+
+  .dash-id .tag {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  .dash-id h3 { font-size: 25px; line-height: 1.05; letter-spacing: -0.035em; }
+
+  .dash-id .who {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.5;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+
+  .dash-body { padding-left: 30px; }
+
+  @media (max-width: 900px) { .dash-body { padding-left: 0; } }
+
+  .dash-q {
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.45;
+    margin-bottom: 26px;
+    letter-spacing: -0.015em;
+  }
+
+  .spec { display: grid; grid-template-columns: 118px 1fr; gap: 11px 22px; font-size: 14.4px; align-items: baseline; }
+
+  .spec dt {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: 4px;
+  }
+
+  .spec dd { margin: 0; color: var(--ink-2); line-height: 1.55; }
+  .spec dd strong { color: var(--ink); font-weight: 600; }
+
+  @media (max-width: 600px) {
+    .spec { grid-template-columns: 1fr; gap: 4px 0; }
+    .spec dd { margin-bottom: 14px; }
+  }
+
+  /* ══════════ JORNADA · pieza destacada ══════════ */
+
+  .jornada-core {
+    background: linear-gradient(168deg, #101216 0%, #0A0B0D 62%);
+    border: 1px solid var(--hair);
+  }
+
+  .detect {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 26px;
+  }
+
+  @media (max-width: 780px) { .detect { grid-template-columns: 1fr; } }
+
+  .det {
+    background: rgba(255,255,255,0.022);
+    border: 1px solid var(--hair-2);
+    border-radius: 1.1rem;
+    padding: 19px 21px;
+    transition: background 0.6s var(--spring), transform 0.6s var(--spring), border-color 0.6s var(--spring);
+  }
+
+  .det:hover {
+    background: rgba(255,255,255,0.045);
+    border-color: var(--hair);
+    transform: translateY(-3px);
+  }
+
+  .det .lab {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  .det .lab .pip { width: 6px; height: 6px; border-radius: 999px; flex: none; }
+  .det.a .lab { color: var(--crit); } .det.a .pip { background: var(--crit); box-shadow: 0 0 12px var(--crit); }
+  .det.b .lab { color: var(--warn); } .det.b .pip { background: var(--warn); box-shadow: 0 0 12px var(--warn); }
+  .det.c .lab { color: var(--ok); }   .det.c .pip { background: var(--ok);   box-shadow: 0 0 12px var(--ok); }
+
+  .det h4 { margin-bottom: 7px; font-size: 15.5px; }
+  .det p { font-size: 13.8px; color: var(--ink-2); line-height: 1.55; }
+
+  /* línea de tiempo SIF */
+  .sif-wrap {
+    margin-top: 26px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--hair-2);
+    border-radius: 1.1rem;
+    padding: 24px 22px 18px;
+    overflow-x: auto;
+  }
+
+  .sif-title {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 20px;
+  }
+
+  .sif-svg { display: block; width: 100%; min-width: 660px; height: auto; }
+
+  .sif-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 18px;
+    padding-top: 15px;
+    border-top: 1px solid var(--hair-2);
+  }
+
+  .sif-legend span {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .sif-legend i { width: 9px; height: 9px; border-radius: 2px; display: block; flex: none; }
+
+  /* ══════════ PIPELINE ══════════ */
+
+  .pipe-step {
+    display: grid;
+    grid-template-columns: 74px 1fr;
+    gap: 26px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--hair-2);
+    transition: background 0.6s var(--spring);
+  }
+
+  .pipe-step:first-child { border-top: 1px solid var(--hair-2); }
+
+  .pipe-n {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    padding-top: 4px;
+  }
+
+  .pipe-step h4 { margin-bottom: 8px; font-size: 17px; }
+  .pipe-step p { font-size: 14.6px; color: var(--ink-2); max-width: 76ch; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+
+  .chip {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.11em;
+    color: var(--ink-3);
+    border: 1px solid var(--hair-2);
+    background: rgba(255,255,255,0.02);
+    border-radius: 999px;
+    padding: 4px 11px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 620px) {
+    .pipe-step { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  /* ══════════ FLUJO ══════════ */
+
+  .flow-scroll { overflow-x: auto; }
+  .flow { display: block; width: 100%; min-width: 700px; height: auto; }
+
+  .flow-cap {
+    font-size: 13.5px;
+    color: var(--ink-3);
+    margin-top: 20px;
+    padding-top: 17px;
+    border-top: 1px solid var(--hair-2);
+    max-width: 76ch;
+  }
+
+  /* ══════════ MÓDULOS ══════════ */
+
+  .mod-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--hair-2);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+
+  .mod-head h3 { font-size: 17.5px; }
+
+  .role {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    white-space: nowrap;
+    border: 1px solid var(--hair-2);
+    background: var(--amber-dim);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  ul.tight { margin: 0; padding-left: 18px; }
+  ul.tight li { font-size: 14.2px; color: var(--ink-2); margin-bottom: 8px; line-height: 1.5; }
+  ul.tight li:last-child { margin-bottom: 0; }
+  ul.tight li strong { color: var(--ink); font-weight: 600; }
+
+  /* ══════════ SEGURIDAD ══════════ */
+
+  .sec-block { margin-bottom: 20px; }
+
+  .sec-block > .lbl {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sec-block > .lbl::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hair-2);
+  }
+
+  .sec-item {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 15px;
+    padding: 17px 0;
+    border-bottom: 1px solid var(--hair-2);
+    align-items: start;
+  }
+
+  .sec-item:first-of-type { border-top: 1px solid var(--hair-2); }
+
+  .shield { width: 17px; height: 17px; margin-top: 4px; color: var(--ok); flex: none; }
+
+  .sec-item h4 { margin-bottom: 5px; }
+  .sec-item p { font-size: 14.1px; color: var(--ink-2); max-width: 78ch; }
+  .sec-item p strong { color: var(--ink); font-weight: 600; }
+
+  code, .ic {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--hair-2);
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: var(--amber);
+  }
+
+  /* ══════════ TABLAS ══════════ */
+
+  .tbl-scroll { overflow-x: auto; margin: 0 -4px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; }
+
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--hair);
+    font-weight: 400;
+  }
+
+  td {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--hair-2);
+    font-size: 14.4px;
+    color: var(--ink-2);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  td strong { color: var(--ink); font-weight: 600; }
+
+  /* ── ficha técnica de seguridad ── */
+  table.ficha { min-width: 700px; }
+  table.ficha td { font-size: 13.6px; padding: 14px 16px; }
+  table.ficha th { padding: 12px 16px; }
+  table.ficha td.ctl { color: var(--ink); font-weight: 600; width: 25%; }
+  table.ficha td.tec { font-family: var(--mono); font-size: 11.8px; color: var(--ink-2); line-height: 1.6; width: 46%; }
+
+  .owner {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    display: inline-block;
+    border: 1px solid;
+  }
+  .owner.prov { color: var(--amber); border-color: rgba(224,164,59,0.4); background: var(--amber-dim); }
+  .owner.cli  { color: var(--ok); border-color: rgba(95,190,135,0.35); background: rgba(95,190,135,0.1); }
+  .owner.ms   { color: var(--ink-2); border-color: var(--hair); background: rgba(255,255,255,0.04); }
+
+  .layer-lbl {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .layer-lbl::after { content: ""; flex: 1; height: 1px; background: var(--hair-2); }
+
+  .exec-p { font-size: 15.6px; color: var(--ink-2); max-width: 74ch; }
+  .exec-p strong { color: var(--ink); font-weight: 600; }
+  .exec-p + .exec-p { margin-top: 13px; }
+
+  /* ══════════ PRECIOS ══════════ */
+
+  .price-core { display: flex; flex-direction: column; gap: 18px; height: 100%; }
+
+  .price-core.lead { border-color: rgba(224,164,59,0.36); }
+
+  .kind {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .fig {
+    font-size: clamp(33px, 5.4vw, 50px);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .fig .per { font-size: 15px; color: var(--ink-3); font-weight: 400; letter-spacing: 0; }
+  .fig.amber { color: var(--amber); }
+
+  .what { font-size: 14.8px; color: var(--ink-2); }
+  .what strong { color: var(--ink); font-weight: 600; }
+
+  .price-core ul.tight li { font-size: 13.9px; }
+
+  .price-foot {
+    margin-top: auto;
+    padding-top: 17px;
+    border-top: 1px solid var(--hair-2);
+    font-size: 10px;
+    color: var(--amber);
+    font-family: var(--mono);
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+  }
+
+  .total-core {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 26px;
+    flex-wrap: wrap;
+    background: linear-gradient(100deg, rgba(224,164,59,0.09), rgba(255,255,255,0.02)) !important;
+  }
+
+  .total-core .lbl { font-size: 15px; color: var(--ink-2); max-width: 54ch; }
+  .total-core .amt {
+    font-family: var(--mono);
+    font-size: clamp(17px, 2.4vw, 23px);
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+
+  /* ══════════ TIMELINE ══════════ */
+
+  .tl-step {
+    display: grid;
+    grid-template-columns: 108px 1fr 140px;
+    gap: 24px;
+    padding: 21px 0;
+    border-bottom: 1px solid var(--hair-2);
+    align-items: start;
+  }
+
+  .tl-step:first-child { border-top: 1px solid var(--hair-2); }
+
+  .tl-when {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--amber);
+    padding-top: 4px;
+  }
+
+  .tl-step h4 { margin-bottom: 5px; font-size: 16px; }
+  .tl-step p { font-size: 14.1px; color: var(--ink-2); max-width: 74ch; }
+
+  .tl-pay {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: right;
+    padding-top: 5px;
+  }
+
+  .tl-pay.on { color: var(--ok); }
+
+  @media (max-width: 760px) {
+    .tl-step { grid-template-columns: 1fr; gap: 6px; }
+    .tl-pay { text-align: left; }
+  }
+
+  /* ══════════ NOTA ══════════ */
+
+  .note-core {
+    background: linear-gradient(100deg, rgba(224,164,59,0.075), rgba(255,255,255,0.015)) !important;
+    border-color: rgba(224,164,59,0.22) !important;
+  }
+
+  .note-core p { font-size: 15px; color: var(--ink-2); }
+  .note-core strong { color: var(--ink); font-weight: 600; }
+
+  /* ══════════ CIERRE ══════════ */
+
+  .close { padding: 110px 0 130px; }
+
+  .close-core {
+    display: flex;
+    justify-content: space-between;
+    gap: 44px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 52px !important;
+    background: linear-gradient(158deg, #101216, #08090B) !important;
+  }
+
+  @media (max-width: 768px) { .close-core { padding: 30px !important; } }
+
+  .close-core h3 { font-size: clamp(25px, 3.6vw, 38px); max-width: 17ch; line-height: 1.1; }
+  .close-core p { font-size: 15.5px; color: var(--ink-2); max-width: 48ch; }
+
+  /* botón isla con icono anidado */
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--amber);
+    color: #0A0A0A;
+    border-radius: 999px;
+    padding: 9px 9px 9px 26px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 26px;
+    transition: transform 0.55s var(--spring), box-shadow 0.55s var(--spring);
+    box-shadow: 0 12px 40px -14px rgba(224,164,59,0.6);
+  }
+
+  .cta:hover { transform: translateY(-2px); box-shadow: 0 20px 52px -14px rgba(224,164,59,0.75); }
+  .cta:active { transform: scale(0.98); }
+  .cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  .cta .knob {
+    width: 34px; height: 34px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.55s var(--spring);
+  }
+
+  .cta:hover .knob { transform: translate(3px, -2px) scale(1.06); }
+  .cta .knob svg { width: 15px; height: 15px; }
+
+  hr.hair { border: none; border-top: 1px solid var(--hair-2); margin: 0; }
+</style>
+
+<div class="page">
+
+  <!-- ══════════════ NAV ══════════════ -->
+  <div class="nav-shell">
+    <nav class="nav" aria-label="Secciones de la propuesta">
+      <span class="brand">Control de Mando</span>
+      <a href="#dashboards">Tableros</a>
+      <a href="#jornada">Jornada</a>
+      <a href="#ingenieria">Ingeniería</a>
+      <a href="#app">Aplicación</a>
+      <a href="#modulos">Módulos</a>
+      <a href="#seguridad">Seguridad</a>
+      <a href="#arquitectura">Arquitectura</a>
+      <a href="#inversion">Inversión</a>
+      <a href="#plan">Plan</a>
+    </nav>
+  </div>
+
+  <!-- ══════════════ HERO ══════════════ -->
+  <header class="wrap hero">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Propuesta comercial · Inteligencia operativa</span>
+    </div>
+    <h1>Cinco tableros y la aplicación que <em>los alimenta</em></h1>
+    <p class="lede">
+      MCRS, OWD, 5S, Gerenciador de Metas y Jornada Laboral. Y delante de ellos
+      <strong>Control de Mando</strong>: la aplicación que valida cada dato antes de que entre,
+      lo escribe en el SharePoint de su organización y registra quién hizo qué.
+      El tablero deja de depender de que alguien recuerde el formato correcto.
+    </p>
+
+    <div class="hero-stats">
+      <div class="hstat"><div>
+        <div class="v" data-count="5">5</div>
+        <div class="k">Dashboards Power BI</div>
+      </div></div>
+      <div class="hstat"><div>
+        <div class="v" data-count="7">7</div>
+        <div class="k">Módulos administrativos</div>
+      </div></div>
+      <div class="hstat"><div>
+        <div class="v" data-count="15">15</div>
+        <div class="k">Controles de seguridad</div>
+      </div></div>
+      <div class="hstat"><div>
+        <div class="v"><span data-count="10">10</span>h</div>
+        <div class="k">Meta de jornada vigilada</div>
+      </div></div>
+      <div class="hstat"><div>
+        <div class="v"><span data-count="10">10</span> sem</div>
+        <div class="k">A producción</div>
+      </div></div>
+    </div>
+  </header>
+
+  <!-- ══════════════ 01 CONTEXTO ══════════════ -->
+  <section class="wrap" id="contexto">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>01 · Contexto</span>
+      <h2>Un tablero es tan bueno como el archivo que lo alimenta</h2>
+      <p class="intro">
+        Cuando la carga es manual aparecen siempre las mismas cinco fallas: una columna renombrada,
+        una hoja con otro nombre, un archivo pisado por error, un dato cargado por quien no debía,
+        y nadie sabe quién subió qué ni cuándo. El resultado es un tablero que muestra números
+        y un equipo que ya dejó de confiar en ellos.
+      </p>
+    </div>
+
+    <div class="bento">
+      <div class="c7 rev">
+        <div class="bezel" style="height:100%"><div class="core">
+          <h3 style="margin-bottom:14px">Lo que entregamos</h3>
+          <p style="font-size:15.2px;color:var(--ink-2)">
+            Los cinco tableros, y delante de ellos una puerta única de entrada. Ningún archivo llega
+            al SharePoint sin pasar una validación de estructura, y ninguna acción ocurre sin quedar
+            registrada con nombre, correo, fecha y detalle.
+          </p>
+          <p style="font-size:15.2px;color:var(--ink-2);margin-top:14px">
+            Los tableros quedan embebidos dentro de la misma aplicación: un solo acceso,
+            un solo control de usuarios, una sola bitácora. El equipo de TI conserva el control
+            del acceso a su propio tenant.
+          </p>
+        </div></div>
+      </div>
+      <div class="c5 rev">
+        <div class="bezel" style="height:100%"><div class="core note-core">
+          <span class="eyebrow" style="margin-bottom:16px"><span class="dot"></span>En producción hoy</span>
+          <p style="margin-top:16px">
+            <strong>Esto no es un prototipo.</strong> La arquitectura descrita aquí opera hoy en una
+            organización logística con ocho módulos activos, integración vía Microsoft Graph
+            y control de acceso por rol.
+          </p>
+          <p style="margin-top:12px">
+            Lo que se propone es su implementación para su operación, con sus tableros y su tenant.
+          </p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 02 DASHBOARDS ══════════════ -->
+  <section class="wrap" id="dashboards">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>02 · Power BI</span>
+      <h2>Los cinco dashboards</h2>
+      <p class="intro">
+        Cada tablero se construye completo: modelado del dato, ETL en Power Query, medidas DAX,
+        diseño visual y publicación. No se entregan gráficos sueltos sino un <strong>modelo semántico</strong>
+        que responde preguntas concretas de la operación.
+      </p>
+    </div>
+
+    <div class="bento" style="gap:16px">
+
+      <!-- 01 MCRS -->
+      <div class="c12 rev">
+        <div class="bezel"><div class="core">
+          <div class="dash">
+            <div class="dash-id">
+              <span class="tag">Dashboard 01</span>
+              <h3>MCRS</h3>
+              <span class="who">Coordinadores de rutina · Jefatura de operaciones</span>
+            </div>
+            <div class="dash-body">
+              <p class="dash-q">¿Qué rutinas están vencidas, de quién son y hace cuánto se dejaron de ejecutar?</p>
+              <dl class="spec">
+                <dt>Fuente</dt><dd>Libro de rutinas MCRS con hoja de estructura fija (~27 campos: folio, dueño, posición, agencia, fechas de creación / inicio / cierre, estado).</dd>
+                <dt>ETL</dt><dd>Normalización de fechas y textos, tipado estricto, deduplicado por folio, tabla calendario propia y jerarquía geográfica (BU → País → Región → Agencia).</dd>
+                <dt>Medidas</dt><dd>% cumplimiento, rutinas vencidas, días de atraso promedio, cumplimiento por dueño y por posición, tendencia contra periodo anterior.</dd>
+                <dt>Vistas</dt><dd>Semáforo ejecutivo, detalle por responsable, evolución mensual, ranking de agencias.</dd>
+              </dl>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 02 OWD -->
+      <div class="c12 rev">
+        <div class="bezel"><div class="core">
+          <div class="dash">
+            <div class="dash-id">
+              <span class="tag">Dashboard 02</span>
+              <h3>OWD</h3>
+              <span class="who">Supervisores de piso · Gestión de calidad</span>
+            </div>
+            <div class="dash-body">
+              <p class="dash-q">¿Cómo evolucionan las evaluaciones OWD y en qué criterio específico se pierde puntaje?</p>
+              <dl class="spec">
+                <dt>Fuente</dt><dd>Libro de evaluaciones OWD con hoja de estructura fija (~25 campos: evaluador, evaluado, área, criterio, puntaje, fecha, observación).</dd>
+                <dt>ETL</dt><dd>Despivoteo de criterios a formato largo, catálogo de áreas y evaluadores, cálculo de periodo de evaluación, control de evaluaciones duplicadas.</dd>
+                <dt>Medidas</dt><dd>Puntaje promedio ponderado, brecha contra meta, criterios críticos recurrentes, comparativo evaluador vs. autoevaluación, avance intermensual.</dd>
+                <dt>Vistas</dt><dd>Mapa de calor área × criterio, tendencia por evaluado, detalle de hallazgos con la observación literal.</dd>
+              </dl>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 03 5S -->
+      <div class="c12 rev">
+        <div class="bezel"><div class="core">
+          <div class="dash">
+            <div class="dash-id">
+              <span class="tag">Dashboard 03</span>
+              <h3>5S</h3>
+              <span class="who">Líderes de área · Comité 5S</span>
+            </div>
+            <div class="dash-body">
+              <p class="dash-q">¿Se está ejecutando el plan anual de auditorías 5S, y las áreas auditadas están mejorando?</p>
+              <dl class="spec">
+                <dt>Fuente</dt><dd>Dos entradas: histórico de evaluaciones ejecutadas (~23 campos) y plan anual de calendarización (ubicación, área, subárea, checklist y los doce meses).</dd>
+                <dt>ETL</dt><dd>Cruce plan vs. ejecutado por llave área-subárea-mes, despivoteo del plan anual a formato largo, sello de año automático en la carga, cálculo de brecha de calendario.</dd>
+                <dt>Medidas</dt><dd>% de cumplimiento del plan, auditorías pendientes del mes, puntaje por cada S, evolución por área, áreas sin auditoría en el periodo.</dd>
+                <dt>Vistas</dt><dd>Calendario de cumplimiento anual, layout por planta, radar de las cinco S, detalle de áreas rezagadas.</dd>
+              </dl>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 04 METAS -->
+      <div class="c12 rev">
+        <div class="bezel"><div class="core">
+          <div class="dash">
+            <div class="dash-id">
+              <span class="tag">Dashboard 04</span>
+              <h3>Gerenciador<br>de Metas</h3>
+              <span class="who">Gerencia · Líderes de equipo · Colaborador</span>
+            </div>
+            <div class="dash-body">
+              <p class="dash-q">¿Cada colaborador sabe cuál es su meta, cómo va contra ella y quién responde por el resultado?</p>
+              <dl class="spec">
+                <dt>Fuente</dt><dd>Maestro de colaboradores y estructura jerárquica, catálogo de objetivos y KPI con meta y peso, resultados periódicos por colaborador.</dd>
+                <dt>ETL</dt><dd>Reconstrucción de la jerarquía líder → colaborador, normalización por cédula como llave única, asignación de peso por objetivo, alineación de periodos de medición.</dd>
+                <dt>Medidas</dt><dd>Cumplimiento ponderado por colaborador y por líder, semáforo por KPI, aporte de cada objetivo al resultado total, evolución acumulada del año.</dd>
+                <dt>Vistas</dt><dd>Organigrama de cumplimiento, tarjeta individual del colaborador, consolidado por líder, ranking de objetivos en riesgo.</dd>
+              </dl>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════ JORNADA · pieza destacada ══════════════ -->
+  <section class="wrap" id="jornada" style="padding-top:20px">
+    <div class="rev">
+      <div class="bezel"><div class="core jornada-core">
+
+        <div class="dash">
+          <div class="dash-id">
+            <span class="tag">Dashboard 05</span>
+            <h3>Jornada<br>Laboral</h3>
+            <span class="who">Recursos humanos · Jefatura de turno · Seguridad y salud en el trabajo</span>
+          </div>
+          <div class="dash-body">
+            <p class="dash-q">
+              La organización fijó una jornada meta de <strong style="color:var(--amber)">10 horas diarias</strong>.
+              ¿Quién se está pasando, quién no descansó de verdad entre un turno y el siguiente,
+              y a qué hora debería entrar mañana cada persona?
+            </p>
+            <dl class="spec">
+              <dt>Propósito</dt><dd>Medir las <strong>horas laboradas diarias</strong> contra la meta de 10 h y detectar el incumplimiento <strong>a tiempo</strong>, no al cierre de nómina cuando ya no hay nada que corregir.</dd>
+              <dt>Fuente</dt><dd>Marcaciones de entrada y salida por colaborador y día, maestro de personal, programación de turnos y calendario de festividades.</dd>
+              <dt>ETL</dt><dd>Emparejamiento de marcación de entrada con su salida, manejo de jornadas que cruzan medianoche, cálculo del intervalo de descanso contra la salida del <strong>día anterior</strong>, y detección de pares incompletos o inconsistentes.</dd>
+              <dt>Medidas</dt><dd>Horas laboradas del día, exceso sobre las 10 h, horas de descanso efectivo entre turnos, indicador SIF, hora de entrada sugerida y conteo de marcaciones erróneas.</dd>
+            </dl>
+          </div>
+        </div>
+
+        <!-- las 4 detecciones -->
+        <div class="detect">
+          <div class="det a">
+            <div class="lab"><span class="pip"></span>Detección 01</div>
+            <h4>Exceso sobre la jornada meta</h4>
+            <p>Identifica al colaborador que superó las 10 horas del día, cuántas horas de más trabajó y con qué frecuencia lo viene haciendo. El exceso repetido en la misma persona es la señal de una carga mal distribuida, no de un día pesado.</p>
+          </div>
+          <div class="det b">
+            <div class="lab"><span class="pip"></span>Detección 02</div>
+            <h4>Marcaciones erróneas, a tiempo</h4>
+            <p>Salidas sin entrada, entradas sin salida, marcaciones duplicadas en minutos, jornadas imposibles y registros fuera del turno programado. Se detectan el mismo día, mientras todavía se pueden corregir con el colaborador presente.</p>
+          </div>
+          <div class="det c">
+            <div class="lab"><span class="pip"></span>Detección 03</div>
+            <h4>Descanso efectivo entre turnos</h4>
+            <p>Cruza la salida del día anterior con la entrada del día siguiente para calcular el descanso real. Una jornada dentro de la meta deja de ser aceptable si la persona solo descansó unas pocas horas antes de volver a entrar.</p>
+          </div>
+          <div class="det a">
+            <div class="lab"><span class="pip"></span>Detección 04 · SIF</div>
+            <h4>Alerta SIF: exceso + descanso insuficiente</h4>
+            <p>La condición crítica: el colaborador se pasó de su jornada <em>y además</em> no descansó efectivamente. Es la combinación que dispara el riesgo de fatiga, y el tablero la marca como evento SIF diferenciado de una simple hora extra.</p>
+          </div>
+        </div>
+
+        <!-- línea de tiempo SIF -->
+        <div class="sif-wrap">
+          <div class="sif-title">Cómo se construye el evento SIF · dos días consecutivos de un mismo colaborador</div>
+          <svg class="sif-svg" viewBox="0 0 880 240" role="img" aria-labelledby="sif-t sif-d">
+            <title id="sif-t">Línea de tiempo de dos jornadas consecutivas y la detección del evento SIF</title>
+            <desc id="sif-d">El día 1 el colaborador trabaja 12 horas y 20 minutos, superando la meta de 10 horas en 2 horas 20 minutos. Entre la salida del día 1 y la entrada del día 2 solo transcurren 7 horas y 10 minutos de descanso, por debajo del descanso efectivo requerido. La combinación de exceso de jornada más descanso insuficiente genera un evento SIF, y el tablero sugiere una hora de entrada posterior para el día 2.</desc>
+
+            <defs>
+              <linearGradient id="gOk" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5FBE87" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#5FBE87" stop-opacity="0.45"/>
+              </linearGradient>
+              <linearGradient id="gOver" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#E0685A" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#E0685A" stop-opacity="0.55"/>
+              </linearGradient>
+              <linearGradient id="gRest" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#E0A43B" stop-opacity="0.30"/>
+                <stop offset="100%" stop-color="#E0A43B" stop-opacity="0.14"/>
+              </linearGradient>
+              <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#E0A43B"/>
+              </marker>
+            </defs>
+
+            <!-- ── DIA 1 ── -->
+            <text x="0" y="24" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10" letter-spacing="1.8" fill="#6B7178">DÍA 1</text>
+
+            <!-- riel -->
+            <rect x="0" y="38" width="880" height="26" rx="6" fill="rgba(255,255,255,0.035)"/>
+            <!-- dentro de meta -->
+            <rect x="0" y="38" width="470" height="26" rx="6" fill="url(#gOk)"/>
+            <!-- exceso -->
+            <rect x="470" y="38" width="112" height="26" rx="6" fill="url(#gOver)"/>
+
+            <!-- marca de meta 10h -->
+            <line x1="470" y1="28" x2="470" y2="76" stroke="#F4F5F6" stroke-width="1.4" stroke-dasharray="3 3"/>
+            <text x="470" y="22" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9.5" letter-spacing="1.2" fill="#F4F5F6">META 10 h</text>
+
+            <!-- marcaciones -->
+            <circle cx="0" cy="51" r="4.5" fill="#0C0D0F" stroke="#5FBE87" stroke-width="2"/>
+            <circle cx="582" cy="51" r="4.5" fill="#0C0D0F" stroke="#E0685A" stroke-width="2"/>
+
+            <text x="6" y="88" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10.5" fill="#A3A8AE">05:40 entrada</text>
+            <text x="588" y="88" text-anchor="end" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10.5" fill="#A3A8AE">18:00 salida</text>
+
+            <text x="235" y="56" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="11" font-weight="600" fill="#08110C">10 h 00 laboradas</text>
+            <text x="526" y="56" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10.5" font-weight="600" fill="#190806">+2 h 20</text>
+
+            <!-- ── DESCANSO ── -->
+            <rect x="582" y="106" width="242" height="26" rx="6" fill="url(#gRest)" stroke="#E0A43B" stroke-opacity="0.4" stroke-dasharray="4 3"/>
+            <text x="703" y="124" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10.5" font-weight="600" fill="#E0A43B">DESCANSO 7 h 10</text>
+            <text x="836" y="124" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10" fill="#E0685A">↯ BAJO</text>
+
+            <!-- ── DIA 2 ── -->
+            <text x="0" y="164" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10" letter-spacing="1.8" fill="#6B7178">DÍA 2</text>
+
+            <rect x="0" y="178" width="880" height="26" rx="6" fill="rgba(255,255,255,0.035)"/>
+            <rect x="824" y="178" width="56" height="26" rx="6" fill="rgba(224,164,59,0.22)"/>
+            <circle cx="824" cy="191" r="4.5" fill="#0C0D0F" stroke="#E0A43B" stroke-width="2"/>
+            <text x="812" y="169" text-anchor="end" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10.5" fill="#E0A43B">01:10 entrada real</text>
+
+            <!-- sugerencia -->
+            <line x1="640" y1="222" x2="820" y2="196" stroke="#E0A43B" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#tip)"/>
+            <text x="632" y="228" text-anchor="end" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10.5" fill="#E0A43B">SUGERIDA 04:00 · para completar descanso efectivo</text>
+
+            <!-- badge SIF -->
+            <g>
+              <rect x="596" y="140" width="146" height="24" rx="12" fill="rgba(224,104,90,0.16)" stroke="#E0685A" stroke-opacity="0.55"/>
+              <circle cx="612" cy="152" r="3.5" fill="#E0685A"/>
+              <text x="624" y="156" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="10" letter-spacing="1.4" fill="#E0685A">EVENTO SIF</text>
+            </g>
+          </svg>
+
+          <div class="sif-legend">
+            <span><i style="background:#5FBE87"></i>Dentro de la meta</span>
+            <span><i style="background:#E0685A"></i>Exceso de jornada</span>
+            <span><i style="background:rgba(224,164,59,0.45)"></i>Descanso entre turnos</span>
+            <span><i style="background:transparent;border:1px solid #E0685A"></i>SIF = exceso + descanso insuficiente</span>
+          </div>
+        </div>
+
+        <div style="margin-top:26px;padding-top:22px;border-top:1px solid var(--hair-2)">
+          <h4 style="margin-bottom:12px">El plus del tablero: sugerir en vez de solo reportar</h4>
+          <p style="font-size:14.8px;color:var(--ink-2);max-width:82ch">
+            La mayoría de los reportes de jornada dicen lo que ya pasó. Este calcula, a partir
+            de la hora de salida del día anterior y del descanso mínimo requerido, <strong style="color:var(--ink)">a qué hora
+            debería entrar cada colaborador al día siguiente</strong> — y lo entrega al jefe de turno antes de
+            que se arme la programación. Así el incumplimiento se previene en la planeación,
+            no se documenta después en un informe.
+          </p>
+        </div>
+
+        <div class="detect" style="margin-top:24px">
+          <div class="det c">
+            <div class="lab"><span class="pip"></span>Vistas</div>
+            <h4>Panel del jefe de turno</h4>
+            <p>Semáforo del día: quién superó la meta, quién viene con descanso corto y la lista de horas de entrada sugeridas para mañana. Es la vista que se abre en la mañana antes de programar.</p>
+          </div>
+          <div class="det b">
+            <div class="lab"><span class="pip"></span>Vistas</div>
+            <h4>Bandeja de marcaciones a corregir</h4>
+            <p>Detalle de cada registro inconsistente con el tipo de falla, para corregirlo el mismo día. Evita que el error llegue al cierre del periodo convertido en un descuento mal calculado.</p>
+          </div>
+          <div class="det a">
+            <div class="lab"><span class="pip"></span>Vistas</div>
+            <h4>Tablero SIF y reincidencia</h4>
+            <p>Eventos SIF del periodo, personas reincidentes, áreas y turnos donde se concentran. Distingue el caso puntual del patrón estructural que exige rediseñar el turno.</p>
+          </div>
+          <div class="det c">
+            <div class="lab"><span class="pip"></span>Vistas</div>
+            <h4>Consolidado por persona y periodo</h4>
+            <p>Horas laboradas, exceso acumulado, descanso promedio y días con incidencia por colaborador. Es la vista que sostiene una conversación con datos, no con percepciones.</p>
+          </div>
+        </div>
+
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 03 INGENIERÍA ══════════════ -->
+  <section class="wrap" id="ingenieria">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>03 · Ingeniería</span>
+      <h2>Qué implica construir cada tablero</h2>
+      <p class="intro">
+        El trabajo visible es la última capa. Debajo hay un modelo de datos que debe soportar
+        años de historia, refrescos automáticos y preguntas que nadie hizo el día de la entrega.
+        Este es el proceso que se ejecuta <strong>por cada uno</strong> de los cinco dashboards.
+      </p>
+    </div>
+
+    <div class="rev">
+      <div class="bezel"><div class="core" style="padding:14px 32px 28px">
+        <div class="pipe-step">
+          <span class="pipe-n">01</span>
+          <div>
+            <h4>Levantamiento y diccionario de indicadores</h4>
+            <p>Sesiones con el dueño del proceso para fijar qué se mide, con qué fórmula exacta, contra qué meta y con qué periodicidad. Se documenta un diccionario firmado antes de escribir la primera línea. Sin este paso, el tablero mide lo que el desarrollador supuso.</p>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">02</span>
+          <div>
+            <h4>Perfilado de la fuente y contrato de datos</h4>
+            <p>Se analiza el archivo real: tipos, nulos, cardinalidad, duplicados, formatos de fecha inconsistentes, tildes y caracteres especiales. De ahí sale el contrato: nombre exacto de hoja, columnas obligatorias, fila de encabezado y tipo esperado. Ese contrato es el mismo que después valida la aplicación.</p>
+            <div class="chips"><span class="chip">PERFILADO</span><span class="chip">CONTRATO DE ESQUEMA</span><span class="chip">REGLAS DE CALIDAD</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">03</span>
+          <div>
+            <h4>ETL en Power Query</h4>
+            <p>Ingesta desde la carpeta de SharePoint, unión incremental de archivos, tipado explícito por columna, limpieza de texto, despivoteo donde corresponda y control de errores por fila para que un dato malo no tumbe el refresco completo. Se privilegia el plegado de consultas y la eliminación temprana de columnas.</p>
+            <div class="chips"><span class="chip">POWER QUERY / M</span><span class="chip">CARPETA SHAREPOINT</span><span class="chip">CARGA INCREMENTAL</span><span class="chip">MANEJO DE ERRORES</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">04</span>
+          <div>
+            <h4>Modelo semántico en estrella</h4>
+            <p>Separación de hechos y dimensiones, tabla calendario marcada, relaciones de un solo sentido, eliminación de relaciones bidireccionales y de columnas calculadas innecesarias. Un modelo en estrella limpio es la diferencia entre un tablero que responde en un segundo y uno que el usuario abandona.</p>
+            <div class="chips"><span class="chip">ESQUEMA ESTRELLA</span><span class="chip">DIM CALENDARIO</span><span class="chip">CARDINALIDAD 1:N</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">05</span>
+          <div>
+            <h4>Medidas DAX y lógica de negocio</h4>
+            <p>Toda métrica se escribe como medida, nunca como columna calculada evitable. Inteligencia de tiempo, medidas de meta y desviación, formato condicional por semáforo, y control explícito del comportamiento en blanco para que un dato ausente no se lea como cero. Aquí viven reglas como el emparejamiento de marcaciones y el cálculo de descanso entre turnos.</p>
+            <div class="chips"><span class="chip">DAX</span><span class="chip">TIME INTELLIGENCE</span><span class="chip">GRUPOS DE CÁLCULO</span><span class="chip">KPI Y METAS</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">06</span>
+          <div>
+            <h4>Diseño de la vista</h4>
+            <p>Jerarquía de lectura: primero el estado general, después el detalle. Paleta accesible con contraste verificado, semáforos que no dependen solo del color, tipografía tabular para que las cifras alineen y navegación con marcadores. Se aplica un tema corporativo unificado a los cinco tableros para que se lean como un mismo sistema.</p>
+            <div class="chips"><span class="chip">TEMA JSON CORPORATIVO</span><span class="chip">ACCESIBILIDAD</span><span class="chip">MARCADORES</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">07</span>
+          <div>
+            <h4>Optimización y validación cruzada</h4>
+            <p>Medición de tiempos de consulta, revisión del plan de ejecución de las medidas pesadas, reducción del tamaño del modelo y contraste de cada cifra del tablero contra el archivo fuente hasta cuadrar. Se documentan los casos borde encontrados.</p>
+            <div class="chips"><span class="chip">SERVER TIMINGS</span><span class="chip">VALIDACIÓN CRUZADA</span></div>
+          </div>
+        </div>
+        <div class="pipe-step" style="border-bottom:none">
+          <span class="pipe-n">08</span>
+          <div>
+            <h4>Publicación, refresco automático y entrega</h4>
+            <p>Publicación al workspace del cliente, configuración de credenciales de origen, refresco programado y disparo bajo demanda desde la aplicación. Se entrega el archivo fuente, la documentación del modelo y una sesión de transferencia con el equipo.</p>
+            <div class="chips"><span class="chip">WORKSPACE DEL CLIENTE</span><span class="chip">REFRESCO PROGRAMADO</span><span class="chip">API DE REFRESCO</span></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 04 APP ══════════════ -->
+  <section class="wrap" id="app">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>04 · Automatización</span>
+      <h2>Control de Mando: la puerta de entrada del dato</h2>
+      <p class="intro">
+        La aplicación se instala entre la estación de trabajo de su equipo y su SharePoint.
+        El usuario no navega carpetas: abre el módulo, suelta el archivo, la aplicación lo valida
+        contra el contrato de datos y —<strong>solo si pasa</strong>— lo escribe en la carpeta correcta
+        mediante Microsoft Graph. El dashboard se refresca desde esa misma carpeta.
+      </p>
+    </div>
+
+    <div class="rev">
+      <div class="bezel"><div class="core">
+        <div class="flow-scroll">
+          <svg class="flow" viewBox="0 0 940 300" role="img" aria-labelledby="fl-t fl-d">
+            <title id="fl-t">Recorrido de un archivo desde la estación de trabajo hasta el dashboard</title>
+            <desc id="fl-d">El archivo sale de la estación de trabajo y entra a Control de Mando, donde se verifica la sesión y el permiso del usuario y luego se valida la estructura del archivo. Si la validación falla, se devuelve al usuario con el detalle del error y nunca se escribe. Si pasa, se escribe en el SharePoint del cliente vía Microsoft Graph, queda registrado en la bitácora de auditoría, alimenta el modelo de Power BI y el tablero vuelve embebido a la misma aplicación.</desc>
+
+            <defs>
+              <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4A5157"/></marker>
+              <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#E0685A"/></marker>
+              <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5FBE87"/></marker>
+            </defs>
+
+            <g font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9.5" letter-spacing="1.7" fill="#6B7178">
+              <text x="4" y="24">ORIGEN</text>
+              <text x="252" y="24">CONTROL DE MANDO · CAPA DE VALIDACIÓN</text>
+              <text x="708" y="24">TENANT DEL CLIENTE</text>
+            </g>
+
+            <rect x="244" y="38" width="410" height="188" rx="14" fill="rgba(224,164,59,0.028)" stroke="rgba(224,164,59,0.24)" stroke-dasharray="4 4"/>
+
+            <rect x="4" y="86" width="152" height="66" rx="12" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="80" y="112" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13.5" font-weight="600" fill="#F4F5F6">Estación de</text>
+            <text x="80" y="130" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13.5" font-weight="600" fill="#F4F5F6">trabajo</text>
+
+            <line x1="156" y1="119" x2="236" y2="119" stroke="#4A5157" stroke-width="1.5" marker-end="url(#a1)"/>
+            <text x="196" y="110" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9.5" fill="#6B7178">.xlsx</text>
+
+            <rect x="262" y="86" width="114" height="66" rx="12" fill="#121417" stroke="rgba(224,164,59,0.45)"/>
+            <text x="319" y="112" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13" font-weight="600" fill="#F4F5F6">Sesión y</text>
+            <text x="319" y="130" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13" font-weight="600" fill="#F4F5F6">permiso</text>
+
+            <line x1="376" y1="119" x2="412" y2="119" stroke="#4A5157" stroke-width="1.5" marker-end="url(#a1)"/>
+
+            <rect x="420" y="86" width="114" height="66" rx="12" fill="#121417" stroke="rgba(224,164,59,0.45)"/>
+            <text x="477" y="112" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13" font-weight="600" fill="#F4F5F6">Validación</text>
+            <text x="477" y="130" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13" font-weight="600" fill="#F4F5F6">de esquema</text>
+
+            <path d="M477,152 L477,190 L319,190 L319,158" fill="none" stroke="#E0685A" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+            <text x="398" y="208" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9.5" letter-spacing="0.9" fill="#E0685A">RECHAZO CON DETALLE DEL ERROR</text>
+
+            <line x1="534" y1="119" x2="568" y2="119" stroke="#4A5157" stroke-width="1.5" marker-end="url(#a1)"/>
+
+            <rect x="576" y="86" width="70" height="66" rx="12" fill="#121417" stroke="rgba(224,164,59,0.45)"/>
+            <text x="611" y="112" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="12.5" font-weight="600" fill="#F4F5F6">Escritura</text>
+            <text x="611" y="129" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="8.5" letter-spacing="0.9" fill="#E0A43B">GRAPH</text>
+
+            <line x1="646" y1="119" x2="700" y2="119" stroke="#4A5157" stroke-width="1.5" marker-end="url(#a1)"/>
+
+            <rect x="708" y="58" width="228" height="54" rx="12" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="822" y="81" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13.5" font-weight="600" fill="#F4F5F6">SharePoint del cliente</text>
+            <text x="822" y="98" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9" letter-spacing="1.1" fill="#6B7178">CARPETA POR MÓDULO</text>
+
+            <line x1="822" y1="112" x2="822" y2="126" stroke="#4A5157" stroke-width="1.5" marker-end="url(#a1)"/>
+
+            <rect x="708" y="130" width="228" height="54" rx="12" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="822" y="153" text-anchor="middle" font-family="Segoe UI, -apple-system, Helvetica Neue, sans-serif" font-size="13.5" font-weight="600" fill="#F4F5F6">Modelo Power BI</text>
+            <text x="822" y="170" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9" letter-spacing="1.1" fill="#6B7178">REFRESCO PROGRAMADO</text>
+
+            <path d="M822,184 L822,248 L319,248 L319,158" fill="none" stroke="#5FBE87" stroke-width="1.5" marker-end="url(#a3)"/>
+            <text x="578" y="266" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="9.5" letter-spacing="0.9" fill="#5FBE87">TABLERO EMBEBIDO DE VUELTA EN LA APLICACIÓN</text>
+
+            <rect x="576" y="196" width="70" height="32" rx="9" fill="none" stroke="rgba(255,255,255,0.14)" stroke-dasharray="3 3"/>
+            <text x="611" y="216" text-anchor="middle" font-family="Consolas, Menlo, DejaVu Sans Mono, monospace" font-size="8.5" letter-spacing="1.1" fill="#6B7178">BITÁCORA</text>
+            <line x1="611" y1="152" x2="611" y2="192" stroke="#4A5157" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#a1)"/>
+          </svg>
+        </div>
+        <p class="flow-cap">
+          Todo dato que entra atraviesa las tres compuertas —sesión, permiso y esquema— antes de tocar
+          el SharePoint. Un archivo rechazado nunca se escribe: el usuario recibe el detalle exacto de
+          la falla (hoja incorrecta, columna faltante, columna sobrante, archivo vacío) y corrige en el
+          momento. Cada escritura y cada borrado quedan en la bitácora.
+        </p>
+      </div></div>
+    </div>
+
+    <div class="bento" style="margin-top:16px">
+      <div class="c4 rev"><div class="bezel" style="height:100%"><div class="core">
+        <h4 style="margin-bottom:10px">Validación antes de escribir</h4>
+        <p style="font-size:14.2px;color:var(--ink-2)">Se verifica el nombre de la hoja, la fila de encabezado, las columnas obligatorias, las columnas no esperadas y que el archivo traiga datos. Solo <span class="ic">.xlsx</span>.</p>
+      </div></div></div>
+      <div class="c4 rev"><div class="bezel" style="height:100%"><div class="core">
+        <h4 style="margin-bottom:10px">Vista previa antes de confirmar</h4>
+        <p style="font-size:14.2px;color:var(--ink-2)">El usuario ve los registros paginados que está por subir y el conteo de filas. Confirma con el dato a la vista, no a ciegas.</p>
+      </div></div></div>
+      <div class="c4 rev"><div class="bezel" style="height:100%"><div class="core">
+        <h4 style="margin-bottom:10px">Escritura gobernada</h4>
+        <p style="font-size:14.2px;color:var(--ink-2)">Renombrado automático por convención, carga por sesión para archivos grandes y destino fijo por módulo. El usuario nunca elige la carpeta.</p>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 05 MÓDULOS ══════════════ -->
+  <section class="wrap" id="modulos">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>05 · Gobierno</span>
+      <h2>Módulos administrativos</h2>
+      <p class="intro">
+        La aplicación no requiere un desarrollador para operar. Todo lo que cambia con el tiempo
+        —quién entra, qué tableros se ven, qué aplicaciones se enlazan— se administra desde
+        la propia interfaz, por perfiles autorizados.
+      </p>
+    </div>
+
+    <div class="bento">
+      <div class="c6 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Administración de usuarios</h3><span class="role">Solo dueño</span></div>
+        <ul class="tight">
+          <li>Alta, edición, inactivación y borrado de usuarios sin tocar código.</li>
+          <li>Cuatro perfiles: <strong>dueño del sistema</strong>, <strong>administrador funcional</strong>, <strong>administrador de módulo</strong> y <strong>consulta</strong>.</li>
+          <li>Permiso módulo por módulo: un mismo usuario puede administrar 5S y solo consultar OWD.</li>
+          <li>Contraseñas con hash <span class="ic">bcrypt</span>; nunca en texto plano ni recuperables.</li>
+          <li>Segmentación por sede o unidad, para operaciones con más de un centro.</li>
+        </ul>
+      </div></div></div>
+
+      <div class="c6 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Auditoría</h3><span class="role">Solo dueño</span></div>
+        <ul class="tight">
+          <li>Registro inmutable de cada acción: fecha y hora local, correo, nombre, módulo, tipo de acción, archivo y detalle.</li>
+          <li>Acciones cubiertas: carga, eliminación, edición, generación, solicitud, aprobación y rechazo.</li>
+          <li>Filtros combinables por módulo, acción, usuario y fecha.</li>
+          <li>Responde sin ambigüedad la pregunta de siempre: <em>¿quién subió este archivo y cuándo?</em></li>
+        </ul>
+      </div></div></div>
+
+      <div class="c6 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Configuración de Power BI</h3><span class="role">Solo dueño</span></div>
+        <ul class="tight">
+          <li>Alta y edición de tableros desde la interfaz: nombre, descripción, enlace, orden y estado.</li>
+          <li>Elección entre tablero embebido o apertura en ventana externa.</li>
+          <li>Disparo de <strong>refresco del modelo bajo demanda</strong> contra la API de Power BI, sin entrar al portal.</li>
+          <li>Publicar un tablero nuevo es una operación de configuración, no un despliegue.</li>
+        </ul>
+      </div></div></div>
+
+      <div class="c6 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Aplicaciones externas</h3><span class="role">Solo dueño</span></div>
+        <ul class="tight">
+          <li>Catálogo de herramientas de terceros que su equipo ya usa, enlazadas desde el mismo portal.</li>
+          <li>Nombre, descripción, ícono, orden y modo de apertura configurables.</li>
+          <li>Control de visibilidad: se activa o desactiva un enlace sin borrarlo.</li>
+          <li>Convierte la aplicación en el punto único de entrada al ecosistema digital del área.</li>
+        </ul>
+      </div></div></div>
+
+      <div class="c6 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Solicitudes</h3><span class="role">Flujo de aprobación</span></div>
+        <ul class="tight">
+          <li>Las acciones destructivas no se ejecutan directamente: se solicitan.</li>
+          <li>Un administrador de módulo pide eliminar un archivo con justificación escrita; el perfil autorizado aprueba o rechaza.</li>
+          <li>Estados <strong>pendiente</strong>, <strong>aprobado</strong> y <strong>rechazado</strong>, con fechas y responsable de cada lado.</li>
+          <li>Elimina el borrado accidental e irreversible como categoría de incidente.</li>
+        </ul>
+      </div></div></div>
+
+      <div class="c6 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Gestión de archivos</h3><span class="role">Por módulo</span></div>
+        <ul class="tight">
+          <li>Listado de lo cargado en cada carpeta, con tamaño y fecha de modificación.</li>
+          <li>Vista previa paginada del contenido sin descargar el archivo.</li>
+          <li>Eliminación con doble confirmación y registro en bitácora.</li>
+          <li>Carga por sesión reanudable para archivos de gran tamaño.</li>
+        </ul>
+      </div></div></div>
+
+      <div class="c12 rev"><div class="bezel" style="height:100%"><div class="core">
+        <div class="mod-head"><h3>Mesa de soporte · Tickets</h3><span class="role">Todos los perfiles</span></div>
+        <div class="bento" style="gap:22px">
+          <div class="c7">
+            <ul class="tight">
+              <li>Cualquier usuario autorizado <strong>crea su ticket desde la propia aplicación</strong>, sin salir a correo ni depender de un contacto personal.</li>
+              <li>Clasificación por tipo —incidente, solicitud de cambio, consulta— y por módulo afectado, con adjuntos y descripción.</li>
+              <li>Seguimiento del estado en línea: <strong>abierto</strong>, <strong>en atención</strong>, <strong>resuelto</strong> y <strong>cerrado</strong>, con el historial de respuestas.</li>
+              <li>Notificación al solicitante en cada cambio de estado.</li>
+              <li>Trazabilidad completa: quién reportó, cuándo, qué se respondió y en cuánto tiempo se resolvió.</li>
+            </ul>
+          </div>
+          <div class="c5">
+            <div style="background:rgba(255,255,255,0.022);border:1px solid var(--hair-2);border-radius:1.1rem;padding:20px 22px;height:100%">
+              <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.17em;text-transform:uppercase;color:var(--amber);margin-bottom:14px">Ventana de atención</div>
+              <div style="font-family:var(--mono);font-size:26px;color:var(--ink);letter-spacing:-0.02em;line-height:1.15">8:00 — 18:00</div>
+              <div style="font-size:13.5px;color:var(--ink-2);margin-top:10px;line-height:1.5">Días hábiles. Los tickets recibidos fuera de la ventana ingresan a la cola y se atienden al inicio del siguiente día hábil.</div>
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--hair-2);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+                  <span style="font-size:12.5px;color:var(--ink-2)">Incidente crítico</span>
+                  <span style="font-family:var(--mono);font-size:14px;color:var(--crit);white-space:nowrap">4 h hábiles</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+                  <span style="font-size:12.5px;color:var(--ink-2)">Consulta o cambio</span>
+                  <span style="font-family:var(--mono);font-size:14px;color:var(--ok);white-space:nowrap">24 h hábiles</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 06 SEGURIDAD ══════════════ -->
+  <section class="wrap" id="seguridad">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>06 · Para el equipo de TI</span>
+      <h2>Seguridad y responsabilidad</h2>
+      <p class="intro">
+        Esta sección viene en dos capas: un <strong>resumen ejecutivo</strong> para quien aprueba la
+        contratación, y una <strong>ficha técnica</strong> control por control para su equipo de tecnología,
+        con el detalle de implementación y quién responde por cada uno.
+        <strong>Queda disponible una sesión técnica con su equipo de TI antes de la firma, sin costo.</strong>
+      </p>
+    </div>
+
+    <!-- ── CAPA 1 · RESUMEN EJECUTIVO ── -->
+    <div class="rev">
+      <div class="bezel"><div class="core" style="padding:34px">
+        <div class="layer-lbl">Capa 1 · Resumen ejecutivo</div>
+        <p class="exec-p">
+          <strong>Sus datos no salen de su casa.</strong> Los archivos operativos viven en el SharePoint
+          de su organización, dentro de su tenant de Microsoft 365. La aplicación los lee y escribe
+          en tránsito; no conserva una copia persistente en infraestructura del proveedor.
+        </p>
+        <p class="exec-p">
+          <strong>El acceso lo controlan ustedes.</strong> La integración opera con un registro de aplicación
+          creado en el Azure Active Directory de su organización, con permiso acotado a una sola
+          biblioteca de documentos. Su equipo de TI otorga el consentimiento y puede revocarlo en
+          cualquier momento; revocarlo detiene la integración de inmediato, sin depender de nosotros.
+        </p>
+        <p class="exec-p">
+          <strong>Cada acción tiene un responsable con nombre.</strong> Toda carga, edición y eliminación
+          queda registrada con usuario, fecha, módulo y detalle. Las acciones destructivas requieren
+          solicitud y aprobación de un segundo perfil.
+        </p>
+        <p class="exec-p">
+          <strong>Si el contrato termina, no pierden nada.</strong> Los datos permanecen íntegros en su
+          SharePoint y los tableros siguen funcionando. Se pierde el acceso a la aplicación, no la información.
+        </p>
+      </div></div>
+    </div>
+
+    <!-- ── nota de alcance del endurecimiento ── -->
+    <div class="rev" style="margin-top:16px">
+      <div class="bezel"><div class="core note-core">
+        <span class="eyebrow"><span class="dot"></span>Alcance de esta implementación</span>
+        <p style="margin-top:16px">
+          <strong>La instancia de su organización se construye endurecida desde el inicio.</strong>
+          El desarrollo para este proyecto incorpora el checklist completo de TI que se detalla
+          en la ficha técnica: control de intentos de autenticación, registro de sesiones,
+          respaldo de los archivos de sistema y política de continuidad — además de las
+          optimizaciones de arquitectura de datos descritas en la sección 07.
+        </p>
+        <p style="margin-top:12px">
+          La ficha distingue explícitamente qué controles entrega el proveedor, cuáles dependen
+          de las políticas del tenant del cliente y cuáles provee la plataforma Microsoft 365.
+        </p>
+      </div></div>
+    </div>
+
+    <!-- ── CAPA 2 · FICHA TÉCNICA ── -->
+    <div class="rev" style="margin-top:16px">
+      <div class="bezel"><div class="core" style="padding:34px">
+        <div class="layer-lbl">Capa 2 · Ficha técnica para TI</div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px">
+          <span class="owner prov">Proveedor</span>
+          <span class="owner cli">Cliente / su tenant</span>
+          <span class="owner ms">Microsoft 365</span>
+        </div>
+
+        <div class="tbl-scroll">
+          <table class="ficha">
+            <thead>
+              <tr><th>Control</th><th>Implementación</th><th>Responsable</th></tr>
+            </thead>
+            <tbody>
+
+              <tr>
+                <td class="ctl" colspan="3" style="color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding-top:20px;border-bottom-color:var(--hair)">Autenticación y sesión</td>
+              </tr>
+              <tr>
+                <td class="ctl">Autenticación</td>
+                <td class="tec">JWT firmado HS256, secreto de 256 bits exclusivo por despliegue. Sin estado de sesión en servidor. Expiración 8 h, sin renovación silenciosa.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Transporte del token</td>
+                <td class="tec">Cookie <code>httpOnly</code> + <code>Secure</code> + <code>SameSite=Lax</code>. Inaccesible desde <code>document.cookie</code>. Mitiga exfiltración por XSS.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Almacenamiento de credenciales</td>
+                <td class="tec">bcrypt, factor de coste 10, sal única por usuario. Hash irreversible; el proveedor no puede recuperar contraseñas.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Límite de intentos</td>
+                <td class="tec">Rate limiting por IP y por cuenta en el endpoint de autenticación, con retardo incremental y bloqueo temporal tras N intentos fallidos consecutivos. Umbral parametrizable.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Registro de sesiones</td>
+                <td class="tec">Bitácora de autenticación: inicio de sesión exitoso, intento fallido, cierre y expiración. Incluye identidad, marca temporal y origen de la petición.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Cuentas por defecto</td>
+                <td class="tec">Ninguna. La cuenta inicial se siembra solo con variables de entorno definidas por el cliente en el despliegue, y se rota tras la habilitación.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">MFA</td>
+                <td class="tec">No implementado en la capa de aplicación. Si se requiere, la vía recomendada es federar la autenticación contra Entra ID y heredar las políticas de acceso condicional del tenant. Cotizable como alcance adicional.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+
+              <tr>
+                <td class="ctl" colspan="3" style="color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding-top:20px;border-bottom-color:var(--hair)">Autorización</td>
+              </tr>
+              <tr>
+                <td class="ctl">Doble verificación</td>
+                <td class="tec">Middleware de borde valida el token en toda navegación; adicionalmente cada endpoint de API reverifica el token de forma independiente. Invocar una API sin sesión válida no ejecuta la operación.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Modelo de permisos</td>
+                <td class="tec">RBAC de cuatro roles, con permiso granular por módulo. Resolución <em>fail-closed</em>: permiso no declarado se evalúa como el nivel más restrictivo, nunca como el más amplio.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Operaciones privilegiadas</td>
+                <td class="tec">Gestión de usuarios, configuración de reportes, disparo de refresco y aprobación de solicitudes exigen rol propietario, verificado en servidor. El conocimiento de la ruta no otorga acceso.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Segregación de funciones</td>
+                <td class="tec">Las eliminaciones no se ejecutan directamente: se generan como solicitud con justificación y requieren aprobación de un rol distinto al solicitante.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+
+              <tr>
+                <td class="ctl" colspan="3" style="color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding-top:20px;border-bottom-color:var(--hair)">Integración con el tenant</td>
+              </tr>
+              <tr>
+                <td class="ctl">Flujo de autorización</td>
+                <td class="tec">OAuth 2.0 <code>client_credentials</code> contra un app registration en el Entra ID del cliente. Consentimiento de administrador otorgado y revocable por el cliente.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Alcance de permisos</td>
+                <td class="tec">Acotado por <code>driveId</code> a una única biblioteca de documentos. Sin acceso a Mail, Calendar, Teams, OneDrive personal ni a otros sitios. Se recomienda sitio dedicado al proyecto.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Gestión de secretos</td>
+                <td class="tec">Variables de entorno cifradas en la plataforma de despliegue. Fuera del repositorio y del bundle de cliente. Token de Graph en memoria del proceso, con renovación anticipada a su expiración.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Rotación de secretos</td>
+                <td class="tec">El client secret del app registration se rota según la política del cliente. Procedimiento de rotación documentado en la entrega; no requiere redespliegue de la aplicación.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Residencia del dato</td>
+                <td class="tec">Los datos operativos residen exclusivamente en el tenant del cliente. El servidor los procesa en memoria durante la petición; sin persistencia en disco ni base de datos del proveedor.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+
+              <tr>
+                <td class="ctl" colspan="3" style="color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding-top:20px;border-bottom-color:var(--hair)">Superficie de entrada</td>
+              </tr>
+              <tr>
+                <td class="ctl">Path traversal</td>
+                <td class="tec">Toda ruta de origen externo se normaliza y valida: se rechazan rutas absolutas, secuencias <code>..</code> y sus variantes codificadas (<code>%2e</code>, <code>%2f</code>). Las carpetas de sistema figuran en lista de denegación.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Validación de carga</td>
+                <td class="tec">Solo <code>.xlsx</code>, verificado por contenido y no solo por extensión. Validación de hoja, fila de encabezado, columnas obligatorias y no esperadas antes de cualquier escritura.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Destino de escritura</td>
+                <td class="tec">Fijado por la configuración del módulo del lado servidor. El cliente no puede especificar carpeta de destino en la petición.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Cifrado en tránsito</td>
+                <td class="tec">HTTPS obligatorio extremo a extremo, con HSTS. Redirección forzada desde HTTP.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Cifrado en reposo</td>
+                <td class="tec">Provisto por la plataforma Microsoft 365 sobre la biblioteca de SharePoint, bajo las políticas de cifrado del tenant del cliente.</td>
+                <td><span class="owner ms">Microsoft</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Aislamiento</td>
+                <td class="tec">Instancia y almacenamiento dedicados por cliente. Sin multi-tenancy a nivel de datos: no existe ruta de código que cruce información entre despliegues.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Enlaces de solo lectura</td>
+                <td class="tec">Token específico por vista, de solo lectura, revocable y sin acceso a la aplicación ni a otras vistas.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+
+              <tr>
+                <td class="ctl" colspan="3" style="color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding-top:20px;border-bottom-color:var(--hair)">Trazabilidad y continuidad</td>
+              </tr>
+              <tr>
+                <td class="ctl">Bitácora de auditoría</td>
+                <td class="tec"><em>Append-only por diseño</em>: la aplicación solo añade registros, nunca los modifica ni elimina. Campos: marca temporal local, identidad, módulo, acción, objeto y detalle. La integridad frente a edición directa se apoya en el versionado y los permisos de la biblioteca de SharePoint.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Endurecimiento de la bitácora</td>
+                <td class="tec">Se restringen los permisos de la carpeta de sistema para que solo la identidad de la aplicación tenga escritura, y se habilita el versionado de la biblioteca. Configuración conjunta durante la habilitación.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Respaldo</td>
+                <td class="tec">Copia programada de los archivos de sistema (usuarios, auditoría, configuración) a una ubicación de retención separada dentro del tenant, con política de retención acordada.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Restauración</td>
+                <td class="tec">Procedimiento documentado y probado durante la fase de pruebas. Los datos operativos se restauran adicionalmente desde el versionado nativo de SharePoint.</td>
+                <td><span class="owner ms">Microsoft</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Canal de soporte</td>
+                <td class="tec">Mesa de tickets integrada en la aplicación. Cada solicitud genera un registro trazable con tipo, módulo, solicitante y marca temporal. Ventana de atención: días hábiles de 8:00 a 18:00. Los tickets fuera de ventana se atienden al inicio del siguiente día hábil.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Tiempo de respuesta</td>
+                <td class="tec"><strong style="color:var(--ink)">4 horas hábiles</strong> para incidentes críticos —los que impiden operar o comprometen la integridad del dato— y <strong style="color:var(--ink)">24 horas hábiles</strong> para consultas y solicitudes de cambio. El conteo corre dentro de la ventana de atención: un ticket abierto a las 17:00 continúa su cómputo a las 8:00 del siguiente día hábil.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Respuesta a incidentes</td>
+                <td class="tec">Los incidentes que afecten confidencialidad o disponibilidad se escalan por el mismo canal con prioridad sobre el resto de la cola, y se notifican al contacto técnico designado por el cliente.</td>
+                <td><span class="owner prov">Proveedor</span></td>
+              </tr>
+              <tr>
+                <td class="ctl">Baja del servicio</td>
+                <td class="tec">A la terminación se revoca el consentimiento del app registration y se elimina la instancia. Los datos permanecen en el tenant del cliente; los tableros continúan operando contra SharePoint.</td>
+                <td><span class="owner cli">Cliente</span></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="rev" style="margin-top:16px">
+      <div class="bezel"><div class="core note-core">
+        <p><strong>Límites explícitos.</strong> La aplicación no accede a correo, calendarios, Teams,
+        OneDrive personal ni a sitios de SharePoint distintos al designado; no almacena copia
+        persistente de datos operativos fuera del tenant del cliente; no comparte información entre
+        clientes; y no puede recuperar contraseñas, porque no las conserva en forma reversible.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 07 ARQUITECTURA DE DATOS ══════════════ -->
+  <section class="wrap" id="arquitectura">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>07 · Arquitectura de datos</span>
+      <h2>Construida para responder rápido</h2>
+      <p class="intro">
+        Una aplicación que lee libros de Excel completos en cada pantalla se vuelve lenta apenas
+        crece el histórico. La instancia de su organización se construye sobre una
+        <strong>arquitectura de datos optimizada</strong> desde el primer día: el formato pesado se reserva
+        para lo que Power BI consume, y la interfaz se sirve de estructuras ligeras e indexadas.
+      </p>
+    </div>
+
+    <div class="bento">
+
+      <div class="c7 rev"><div class="bezel" style="height:100%"><div class="core">
+        <h3 style="margin-bottom:14px">Dos formatos, dos propósitos</h3>
+        <p style="font-size:14.8px;color:var(--ink-2)">
+          El libro de Excel sigue siendo la <strong style="color:var(--ink)">fuente de verdad operativa</strong>:
+          es lo que el usuario carga, lo que Power BI consume y lo que queda como respaldo auditable
+          en su SharePoint.
+        </p>
+        <p style="font-size:14.8px;color:var(--ink-2);margin-top:13px">
+          Pero la interfaz no lo lee directamente. Al cargar un archivo, la aplicación genera además una
+          <strong style="color:var(--ink)">proyección en JSON</strong> con solo los campos que las pantallas necesitan,
+          ya tipados y agregados. Abrir un módulo pasa de descargar y parsear un libro completo
+          a leer un documento ligero.
+        </p>
+        <div class="chips" style="margin-top:16px">
+          <span class="chip">XLSX · FUENTE Y PBI</span>
+          <span class="chip">JSON · CAPA DE LECTURA</span>
+          <span class="chip">TIPADO EN ORIGEN</span>
+        </div>
+      </div></div></div>
+
+      <div class="c5 rev"><div class="bezel" style="height:100%"><div class="core">
+        <h3 style="margin-bottom:14px">Sistema de índices</h3>
+        <p style="font-size:14.8px;color:var(--ink-2)">
+          Cada carpeta mantiene un índice con el inventario de sus archivos: nombre, periodo,
+          tamaño, fecha, número de registros y estado de validación.
+        </p>
+        <p style="font-size:14.8px;color:var(--ink-2);margin-top:13px">
+          Listar, buscar o comprobar qué hay cargado se resuelve contra el índice, sin recorrer
+          la biblioteca ni abrir un solo libro.
+        </p>
+      </div></div></div>
+
+      <div class="c12 rev"><div class="bezel"><div class="core" style="padding:14px 32px 26px">
+        <div class="pipe-step">
+          <span class="pipe-n">A</span>
+          <div>
+            <h4>Proyecciones precalculadas en la escritura, no en la lectura</h4>
+            <p>Los agregados que alimentan tarjetas y resúmenes se calculan una sola vez, en el momento de la carga, y se guardan junto al índice. La pantalla no recalcula nada: lee un valor ya resuelto. El costo se paga una vez por archivo, no una vez por visita.</p>
+            <div class="chips"><span class="chip">AGREGADOS AL CARGAR</span><span class="chip">LECTURA O(1)</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">B</span>
+          <div>
+            <h4>Caché con invalidación por escritura</h4>
+            <p>Las respuestas se sirven desde caché en memoria con marca de versión. Cuando un usuario carga o elimina un archivo, la escritura invalida la entrada correspondiente. El dato mostrado nunca queda rezagado respecto de lo que hay en SharePoint, y las lecturas repetidas no vuelven a salir a la red.</p>
+            <div class="chips"><span class="chip">CACHÉ VERSIONADA</span><span class="chip">INVALIDACIÓN EXPLÍCITA</span></div>
+          </div>
+        </div>
+        <div class="pipe-step">
+          <span class="pipe-n">C</span>
+          <div>
+            <h4>Paginación en servidor y carga diferida</h4>
+            <p>Las vistas de detalle no traen el conjunto completo al navegador: piden la página que se está viendo. Las pantallas pesadas cargan primero el resumen y difieren el detalle. La aplicación responde igual de rápido con un mes de historia que con tres años.</p>
+            <div class="chips"><span class="chip">PAGINACIÓN SERVIDOR</span><span class="chip">CARGA DIFERIDA</span></div>
+          </div>
+        </div>
+        <div class="pipe-step" style="border-bottom:none">
+          <span class="pipe-n">D</span>
+          <div>
+            <h4>Convención de nombres y particionado por periodo</h4>
+            <p>Los archivos se renombran automáticamente por convención al cargarse, y se organizan por periodo. Eso permite que Power BI haga carga incremental sobre la carpeta —refrescando solo lo nuevo en lugar de releer todo el histórico— y que la aplicación acote cualquier consulta al rango que necesita.</p>
+            <div class="chips"><span class="chip">RENOMBRADO AUTOMÁTICO</span><span class="chip">PARTICIÓN POR PERIODO</span><span class="chip">REFRESCO INCREMENTAL</span></div>
+          </div>
+        </div>
+      </div></div></div>
+
+      <div class="c12 rev"><div class="bezel"><div class="core note-core">
+        <p><strong>Por qué esto aparece en la propuesta y no solo en el contrato técnico.</strong>
+        Es la diferencia entre una herramienta que el equipo abre todos los días y una que
+        terminan evitando porque tarda. La velocidad de la interfaz no es un detalle de
+        implementación: determina si el sistema se usa o se abandona.</p>
+      </div></div></div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════ 08 INVERSIÓN ══════════════ -->
+  <section class="wrap" id="inversion">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>08 · Inversión</span>
+      <h2>Dos componentes, dos naturalezas</h2>
+      <p class="intro">
+        Los tableros son un <strong>desarrollo</strong> que se entrega y queda como activo del cliente.
+        La aplicación es un <strong>servicio</strong> con operación, soporte e infraestructura continuos.
+      </p>
+    </div>
+
+    <div class="bento">
+      <div class="c6 rev">
+        <div class="bezel" style="height:100%"><div class="core price-core lead">
+          <span class="kind">Componente 1 · Desarrollo</span>
+          <div>
+            <div class="fig amber">$7.000.000 <span class="per">COP</span></div>
+            <p class="what" style="margin-top:12px">Pago único por los <strong>cinco dashboards completos</strong>. Incluye todo el proceso de ingeniería de la sección 03.</p>
+          </div>
+          <ul class="tight">
+            <li>Levantamiento y diccionario de indicadores</li>
+            <li>ETL, modelo semántico y medidas DAX</li>
+            <li>Diseño visual con tema corporativo unificado</li>
+            <li>Publicación en su workspace y refresco programado</li>
+            <li>Documentación del modelo y transferencia al equipo</li>
+            <li>Archivos fuente entregados: el activo queda suyo</li>
+          </ul>
+          <div class="price-foot">50% anticipado · 50% a la aceptación</div>
+        </div></div>
+      </div>
+
+      <div class="c6 rev">
+        <div class="bezel" style="height:100%"><div class="core price-core">
+          <span class="kind">Componente 2 · Licencia de uso</span>
+          <div>
+            <div class="fig">USD 300 <span class="per">/ mes</span></div>
+            <p class="what" style="margin-top:12px">Licencia de uso de <strong>Control de Mando</strong>, con usuarios ilimitados dentro de su organización.</p>
+          </div>
+          <ul class="tight">
+            <li>Instancia dedicada, infraestructura y disponibilidad</li>
+            <li>Todos los módulos administrativos de la sección 05</li>
+            <li>Integración con su SharePoint vía Microsoft Graph</li>
+            <li>Los cinco tableros embebidos en la aplicación</li>
+            <li>Mesa de tickets: 4 h críticos · 24 h consultas</li>
+            <li>Actualizaciones y mejoras de la plataforma</li>
+          </ul>
+          <div class="price-foot">Contrato mínimo · 6 meses</div>
+        </div></div>
+      </div>
+
+      <div class="c12 rev">
+        <div class="bezel"><div class="core total-core">
+          <span class="lbl">Compromiso del primer periodo: desarrollo de los cinco tableros más los seis meses mínimos de licencia.</span>
+          <span class="amt">$7.000.000 COP + USD 1.800</span>
+        </div></div>
+      </div>
+
+      <div class="c12 rev">
+        <div class="bezel"><div class="core" style="padding:8px 12px">
+          <div class="tbl-scroll">
+            <table>
+              <thead><tr><th>Concepto</th><th>Condición</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Plazo mínimo</strong></td><td>Seis (6) meses de licencia desde la puesta en producción. Renovación automática por periodos mensuales, salvo aviso con 30 días de anticipación.</td></tr>
+                <tr><td><strong>Pago — desarrollo</strong></td><td><strong>50% anticipado a la firma</strong> y 50% restante a la aceptación formal de los cinco tableros.</td></tr>
+                <tr><td><strong>Pago — licencia</strong></td><td>Mensual anticipada. <strong>El primer mes se paga por anticipado</strong> al inicio del servicio.</td></tr>
+                <tr><td><strong>Propiedad del desarrollo</strong></td><td>Los tableros, el modelo semántico y los archivos fuente son propiedad del cliente al completar el pago del desarrollo.</td></tr>
+                <tr><td><strong>Propiedad de la aplicación</strong></td><td>Control de Mando se licencia, no se vende. El código fuente permanece en propiedad del proveedor.</td></tr>
+                <tr><td><strong>Alcance incluido</strong></td><td>Hasta dos (2) rondas de ajuste por tablero durante la validación. Nuevos indicadores o tableros adicionales se cotizan aparte.</td></tr>
+                <tr><td><strong>Soporte</strong></td><td>Mesa de tickets integrada en la aplicación. Atención en <strong>días hábiles de 8:00 a 18:00</strong>; las solicitudes recibidas fuera de esa ventana ingresan a la cola y se atienden al inicio del siguiente día hábil.</td></tr>
+                <tr><td><strong>Tiempo de respuesta</strong></td><td><strong>4 horas hábiles</strong> para incidentes críticos y <strong>24 horas hábiles</strong> para consultas y solicitudes de cambio, contadas dentro de la ventana de atención.</td></tr>
+                <tr><td><strong>Licencias de terceros</strong></td><td>No incluidas. Microsoft 365 con SharePoint y las licencias de Power BI que su organización requiera corren por cuenta del cliente.</td></tr>
+                <tr><td><strong>Salida del servicio</strong></td><td>Al terminar, sus datos permanecen íntegros en su SharePoint y sus tableros siguen funcionando. Se pierde el acceso a la aplicación, no la información.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ 09 PLAN ══════════════ -->
+  <section class="wrap" id="plan">
+    <div class="sec-head rev">
+      <span class="eyebrow plain"><span class="dot"></span>09 · Implementación</span>
+      <h2>Diez semanas a producción</h2>
+      <p class="intro">
+        Las fases se numeran porque el orden importa: no se construye un tablero antes de fijar
+        el indicador, y no se despliega la aplicación antes de que TI apruebe la integración.
+      </p>
+    </div>
+
+    <div class="rev">
+      <div class="bezel"><div class="core" style="padding:14px 32px 26px">
+        <div class="tl-step">
+          <span class="tl-when">Semana 1</span>
+          <div><h4>Levantamiento y diccionario de indicadores</h4><p>Sesiones por proceso. Se define qué mide cada indicador, con qué fórmula y contra qué meta —incluida la jornada de 10 h y el umbral de descanso efectivo. Se acuerda el contrato de datos de cada fuente. Entregable firmado antes de continuar.</p></div>
+          <span class="tl-pay on">Anticipo 50%</span>
+        </div>
+        <div class="tl-step">
+          <span class="tl-when">Semana 2</span>
+          <div><h4>Habilitación técnica con TI</h4><p>Sesión con su equipo de tecnología: registro de aplicación en su Azure AD, creación del sitio y biblioteca de SharePoint, permisos acotados y validación del modelo de seguridad de la sección 06.</p></div>
+          <span class="tl-pay">—</span>
+        </div>
+        <div class="tl-step">
+          <span class="tl-when">Semanas 3–6</span>
+          <div><h4>Construcción de los cinco tableros</h4><p>ETL, modelo, medidas y diseño. Entregas parciales para revisión temprana: no se espera al final para mostrar resultados. Validación cruzada de cada cifra contra la fuente.</p></div>
+          <span class="tl-pay">—</span>
+        </div>
+        <div class="tl-step">
+          <span class="tl-when">Semanas 5–7</span>
+          <div><h4>Configuración de Control de Mando</h4><p>Despliegue de la instancia dedicada, conexión a su SharePoint, configuración de los cinco módulos de carga con sus contratos de datos, alta de usuarios y asignación de permisos.</p></div>
+          <span class="tl-pay on">1.er mes licencia</span>
+        </div>
+        <div class="tl-step">
+          <span class="tl-when">Semana 8</span>
+          <div><h4>Pruebas con usuarios reales</h4><p>Su equipo carga archivos reales, incluidos archivos deliberadamente mal formados para verificar que el rechazo funciona. Se ajustan mensajes, validaciones y permisos según lo observado.</p></div>
+          <span class="tl-pay">—</span>
+        </div>
+        <div class="tl-step">
+          <span class="tl-when">Semana 9</span>
+          <div><h4>Capacitación y documentación</h4><p>Dos sesiones: una operativa para quienes cargan datos y leen tableros, otra administrativa para los perfiles dueño. Se entrega manual de usuario y documentación del modelo.</p></div>
+          <span class="tl-pay">—</span>
+        </div>
+        <div class="tl-step" style="border-bottom:none">
+          <span class="tl-when">Semana 10</span>
+          <div><h4>Puesta en producción y acompañamiento</h4><p>Salida a producción con acompañamiento cercano durante el primer ciclo completo de carga. Desde aquí corre el plazo de los seis meses de licencia.</p></div>
+          <span class="tl-pay on">Saldo 50%</span>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ CIERRE ══════════════ -->
+  <div class="wrap close">
+    <div class="rev">
+      <div class="bezel"><div class="core close-core">
+        <div>
+          <span class="eyebrow"><span class="dot"></span>Siguiente paso</span>
+          <h3 style="margin-top:22px">La diferencia está en la puerta de entrada</h3>
+        </div>
+        <div>
+          <p>
+            Cinco dashboards se pueden construir en cualquier parte. Lo que sostiene su valor con
+            el tiempo es que nadie pueda romperlos con un archivo mal formado, que cada carga tenga
+            un responsable con nombre, y que su equipo de TI conserve el control del acceso a su
+            propio tenant.
+          </p>
+          <p style="margin-top:14px">Quedamos atentos a agendar la sesión técnica con su equipo de tecnología.</p>
+          <a class="cta" href="Propuesta-Control-de-Mando.pdf" download>
+            Descargar en PDF
+            <span class="knob" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>
+            </span>
+          </a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── revelado por scroll ── */
+  var revs = document.querySelectorAll(".rev");
+  if (reduce || !("IntersectionObserver" in window)) {
+    revs.forEach(function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add("in");
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+    revs.forEach(function (el) { io.observe(el); });
+
+    /* Salvaguarda: al llegar por ancla (#seccion) o al restaurar el scroll,
+       todo lo que ya quedo por encima del viewport se revela de inmediato,
+       para que nada quede invisible al volver a subir. */
+    function revelarSobrePasados() {
+      revs.forEach(function (el) {
+        if (el.classList.contains("in")) return;
+        var r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight) {
+          el.classList.add("in");
+          io.unobserve(el);
+        }
+      });
+    }
+    window.addEventListener("hashchange", function () {
+      setTimeout(revelarSobrePasados, 60);
+    });
+    window.addEventListener("load", revelarSobrePasados);
+    setTimeout(revelarSobrePasados, 400);
+  }
+
+  /* ── contadores del hero ── */
+  var counters = document.querySelectorAll("[data-count]");
+  counters.forEach(function (el) {
+    var target = parseInt(el.getAttribute("data-count"), 10);
+    if (reduce || isNaN(target)) { el.textContent = String(target); return; }
+    var start = null, dur = 1100;
+    el.textContent = "0";
+    function tick(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 4);
+      el.textContent = String(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+})();
+</script>
+
+</body>
+</html>
